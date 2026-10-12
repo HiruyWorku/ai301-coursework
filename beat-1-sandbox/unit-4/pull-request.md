@@ -1,5 +1,13 @@
 # Unit 4 — Test and Submit
 
+## Evaluation substitution disclosure
+
+The final official Claude Sonnet run could not complete because the course-linked Claude account returned "You've hit your individual spend limit". The full attempt produced 20 CLI errors and saved no evaluation transcript. At my request, Codex was used to complete an alternative evaluation before submission.
+
+The alternative uses Codex CLI with gpt-6.1-sol and medium reasoning, the same four skill files, the course's exact prompt template, and all 20 frozen scored packages. Each package is graded in a fresh session using only its supplied bundle; gold labels are used for scoring after every response is saved. The original Sonnet harness and the skill were not changed. Complete verdicts, evidence, hashes, and the reproducible alternative runner are in [evaluation/](evaluation/README.md).
+
+This is a disclosed model substitution, not an official Sonnet result. The Sonnet-calibrated pass bar is not asserted for Codex, and instructor approval for the substitution has not been obtained. I am submitting the actual alternative results alongside the completed PR and green CI and asking that the documented account limit be considered.
+
 ## Your pull request
 
 **Pull request**
@@ -10,7 +18,7 @@ GitHub username: HiruyWorku.
 
 Opened from my fork at commit `a35b0a4`; only api/routes/health.py, pyproject.toml, and tests/unit/test_health.py are in the PR diff. Local verification: 378 unit tests passed, 53 xfailed; 18 frontend tests passed; lint, format, and targeted health-file typecheck passed. The live HTTP reproduction reports Redis healthy while the separate Postgres bug #61 keeps the overall response at 503.
 
-The Claude live pr-precheck is blocked by the same individual spend limit as the final eval. I reviewed the draft against the five uploaded checks: the diff matches the planned files and scope, the description matches the diff, test evidence includes concrete before/after and all three passing regression tests, the diff has no unrelated debris, and the upstream template is filled with an AI-use disclosure. This manual review is not a claimed Claude skill run.
+The Claude live pr-precheck is blocked by the same individual spend limit as the official eval. A separate alternative Codex precheck of the captured real PR package returned **accept**, with all five required checks passing. Its full response is recorded in [evaluation/live-precheck.md](evaluation/live-precheck.md); it is explicitly labeled as a Codex result.
 
 CI: **all five jobs passed** on commit a35b0a4: lint, typecheck, test-unit, test-integration, and frontend. [CI run](https://github.com/codepath/pathreview-ai301-fa26-s1/actions/runs/38188141003). Hosted typecheck passes; the disclosed numpy stub failure is specific to the local environment.
 
@@ -37,19 +45,20 @@ Recovered from the original Claude session's actual harness outputs, in order. C
 11. `--only pkg-16`: `agreement: 0/1 scored items`.
 12. After allowing named repo-wide checks to report their result without a count, `--only pkg-16,pkg-04,pkg-07,pkg-10,pkg-14,calib-04 --include-calibration`: `agreement: 5/5 scored items`.
 
-The handoff records that every scored package was individually checked against the final wording. That is not a full confirming run. On October 11, the attempted full `--save-run eval-run.txt` run returned 20 CLI errors and `agreement: 0/0 scored items`; a diagnostic Claude request reported: "You've hit your individual spend limit". The harness saved no transcript. The final full-run score is pending, and eval-run.txt remains the original placeholder until the harness produces a valid complete run.
+13. Attempted full official Sonnet run: all 20 packages returned CLI errors; `agreement: 0/0 scored items`. The harness wrote no transcript. A diagnostic request returned "You've hit your individual spend limit".
+14. Full **alternative Codex run**, gpt-6.1-sol with medium reasoning, using the unchanged skill: **`agreement: 17/20 scored items`**. Categories: `clear-accept 4/7`, `not-tested 4/4`, `silent-drift 4/4`, `standards-wall 2/2`, `unreviewable 3/3`. This is the final run recorded in the submitted eval-run.txt, whose header explicitly identifies the alternative grader. The official Sonnet run remains unavailable; no official PASS is claimed.
 
 **Package analysis**
 
-`pkg-05`, Nushell's keybinding merge fix: gold is `accept`. Earlier rubric versions returned `reject` on "Test evidence is decisive and complete". The saved diagnostic output states:
+`pkg-08`, lazygit's untracked-only stash guard: the final Codex run decided `reject`; gold says `accept`. Four checks passed; "Test evidence is decisive and complete" failed. The grader's complete response is in evaluation/responses/pkg-08.md. Its deciding evidence says:
 
-> Repo-required checks reported only as 'fmt and clippy clean' with zero attached specifics (no warning count, no diff, no output), matching the rubric's bare-adjective fail condition.
+> The primary repro reports the exact toast, no prompt, and untracked.txt still listed, but the tracked-change control merely says it 'creates the stash' without a specific entry, count, or state comparison.
 
-That was a false positive. The package shows a concrete before/after table: before, only the `none / up` binding remains; after, both `control / char_r` and `none / up` remain. Its added tests verify the behavior, and its evidence says:
+The package's own control text reads:
 
-> `cargo test -p nu-protocol` passes (312 tests); fmt and clippy clean.
+> Control: with a tracked modification staged, `s` still prompts and creates the stash.
 
-The final wording accepts named repo-wide results alongside decisive primary evidence, so pkg-05 agrees with gold in the later 5/5 run. It still rejects pkg-04, pkg-07, pkg-10, and pkg-14, where the primary evidence is absent or uses the wrong trigger.
+The primary before/after is concrete: before, the prompt completes with an empty stash list; after, the exact error toast appears, no prompt opens, and untracked.txt remains listed. Codex accepted that primary evidence but interpreted the rubric's separate-control requirement more strictly, demanding a stash entry or count for the successful tracked-change control. Gold accepts the package's terse behavior report. I preserved this disagreement in the submitted score rather than replacing the grader's result. `pkg-13` and `pkg-19` also disagree on terse regression-control reports; every other package matches gold.
 
 **Check rationale**
 
@@ -71,4 +80,6 @@ The revisions distinguish a vague primary claim from a normal secondary check re
 
 A named repo check reported as passing could be invented; this rubric cannot prove that the author ran the command. Requiring output for every secondary check would provide more material to cross-check, but it also wrongly rejected terse, complete packages. I accept that limitation while requiring concrete facts or directly relevant automated assertions plus a test count for the primary behavior. After the change, the `--only pkg-16,pkg-04,pkg-07,pkg-10,pkg-14,calib-04` canary run scored 5/5, and calib-04 still rejected because only one of its two planned failure modes was evidenced.
 
-Related paths: eval-run.txt in this directory and tools/pr-precheck/.
+The Codex run shows the cost of the strict control wording: pkg-08, pkg-13, and pkg-19 were rejected even though gold accepts them. These are documented false positives; I left the skill unchanged for the model substitution so this run measures the same artifact used in the earlier Claude iterations. A different grader can interpret the same prose differently, so the Codex score is not evidence that the official Sonnet threshold was met.
+
+Related paths: eval-run.txt in this directory, evaluation/ for alternative-run provenance and raw responses, and tools/pr-precheck/.

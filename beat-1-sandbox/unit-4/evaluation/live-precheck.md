@@ -1,0 +1,39 @@
+# Alternative Codex live precheck — PR #138
+
+Model: gpt-6.1-sol, medium reasoning. This replaces the blocked Claude live check at the student's request; it is not a Claude result. The supplied live issue/thread/template, policy, branch diff, plan, draft, test evidence, and hosted CI were captured October 11, 2026.
+
+Prompt SHA-256: 0fba48b2e6d607eed2fc929b3e1f30f9efb6d0778a2e76b65d55bd9c3fe4273a
+
+```json
+{
+  "item": "live-pr-138",
+  "checks": [
+    {
+      "name": "Diff matches the plan's scope, or deviations are noted",
+      "grade": "pass",
+      "evidence": "The diff changes exactly the three planned files: Redis construction in api/routes/health.py, the attr-defined suppression in pyproject.toml, and Redis regression tests in tests/unit/test_health.py; the Postgres probe remains untouched."
+    },
+    {
+      "name": "Description's fidelity claims match the diff",
+      "grade": "pass",
+      "evidence": "The description accurately identifies Redis.from_url(settings.redis_url, decode_responses=True), removal of attr-defined, and three tests for settings fields, successful ping, and connection failure."
+    },
+    {
+      "name": "Test evidence is decisive and complete",
+      "grade": "pass",
+      "evidence": "With Redis answering PONG, the HTTP response changes from redis=unhealthy to redis=healthy and logs redis_health_check_passed; settings controls remain False/False/True, all three health tests pass within 378 passed, and required checks have reported outcomes, including disclosed local failures and all five hosted CI jobs passing."
+    },
+    {
+      "name": "Diff is free of debris",
+      "grade": "pass",
+      "evidence": "All hunks implement the planned constructor fix, suppression removal and explanatory comment, or regression tests; no debug statements, abandoned code, unused helpers, or unrelated formatting/import churn appear."
+    },
+    {
+      "name": "PR meets the repo's stated template, policy, and thread direction",
+      "grade": "pass",
+      "evidence": "All six template sections contain specific content or justified N/A; Closes #62 is present, local failures are left unchecked and explained, hosted CI confirms all five jobs pass at a35b0a4, AI assistance is disclosed, and no explicit maintainer direction appears in the captured thread."
+    }
+  ],
+  "verdict": "accept"
+}
+```
