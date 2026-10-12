@@ -58,7 +58,7 @@ Re-run my week-2 repro steps against the fix:
 ## Risks and unknowns
 
 - `Redis.from_url()` ignores the `db=0` keyword I'm removing explicitly, but I checked both `.env.example` and `.github/workflows/ci.yml`: both set `REDIS_URL=redis://localhost:6379/0`, so the `/0` database segment is already present in every config this repo ships, and `from_url()` parses it the same way the old code's explicit `db=0` did. A repo-wide search for `redis_host`/`redis_port` found no other references outside the one buggy line, so no other code path depends on those attributes existing.
-- I have not run the full `test-integration` suite locally against this change (only `test-unit` and a manual repro re-run); if an integration test asserts on the exact exception type/message from the old `AttributeError` path, it would need updating, though I found no such reference in a repo-wide search either.
+- Unit 4 update (October 11): `make test-integration` was run and collected no tests (pytest exit 5; make exit 2). The directory is empty, and CI explicitly treats pytest exit 5 as success. There is no integration coverage to confirm this route beyond the new unit tests and the manual HTTP reproduction.
 
 ## Deviations
 
@@ -84,4 +84,13 @@ The build matched the plan; two things worth recording honestly:
 
 Nothing about the diagnosis, scope, approach, or files changed from
 what's written above.
-(filled in after the build)
+Unit 4 verification (October 11): `make test-unit` reports 378 passed and
+53 xfailed, including all three new health tests; lint, format check,
+targeted health-file mypy, and 18 frontend tests pass. `make typecheck`
+still hits the same numpy stub error. The fresh HTTP reproduction used
+loopback port 8762 with the existing config and backing services:
+Redis answers PONG, the response reports redis healthy, and the log
+contains redis_health_check_passed. HTTP 503 remains from #61. No
+issue #62 test-level xfail marker was found. Full captured output is in
+untracked test_evidence.md. Frontend tests used existing installed
+dependencies; a fresh npm ci was not run in this session.
